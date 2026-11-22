@@ -1,0 +1,2475 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>쉬는타임 - 대학생 공강 맞춤형 미니 힐링 웹앱</title>
+  <style>
+    :root {
+      --bg-app: #f8fafc;
+      --bg-card: #ffffff;
+      --bg-subtle: #f1f5f9;
+      --text-main: #0f172a;
+      --text-sub: #475569;
+      --text-muted: #94a3b8;
+      --primary: #4f46e5;
+      --primary-light: #eef2ff;
+      --primary-hover: #4338ca;
+      --accent: #f59e0b;
+      --danger: #ef4444;
+      --danger-light: #fef2f2;
+      --success: #10b981;
+      --success-light: #ecfdf5;
+      --border: #e2e8f0;
+      --radius-sm: 8px;
+      --radius-md: 14px;
+      --radius-lg: 20px;
+      --radius-full: 9999px;
+      --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.05);
+      --shadow-md: 0 4px 14px rgba(0, 0, 0, 0.07);
+      --shadow-lg: 0 12px 28px rgba(0, 0, 0, 0.1);
+      --font-family: -apple-system, BlinkMacSystemFont, "Pretendard", "Segoe UI", Roboto, "Helvetica Neue", "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
+    }
+
+    body[data-theme="lavender"] {
+      --primary: #7c3aed;
+      --primary-light: #f5f3ff;
+      --primary-hover: #6d28d9;
+    }
+    body[data-theme="sage"] {
+      --primary: #059669;
+      --primary-light: #ecfdf5;
+      --primary-hover: #047857;
+    }
+    body[data-theme="sunset"] {
+      --primary: #ea580c;
+      --primary-light: #fff7ed;
+      --primary-hover: #c2410c;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      font-family: var(--font-family);
+      background-color: #cbd5e1;
+      color: var(--text-main);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      min-height: 100dvh;
+      margin: 0;
+      padding: 0;
+      line-height: 1.5;
+    }
+
+    #app-container {
+      width: 100%;
+      max-width: 440px;
+      height: 100vh;
+      height: 100dvh;
+      max-height: 920px;
+      background-color: var(--bg-app);
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+      overflow: hidden;
+    }
+
+    @media (min-width: 480px) {
+      #app-container {
+        border-radius: 36px;
+        height: 92vh;
+        border: 8px solid #0f172a;
+      }
+    }
+
+    /* 상단 헤더 */
+    header {
+      background: var(--bg-card);
+      padding: 13px 18px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid var(--border);
+      z-index: 20;
+    }
+
+    .brand-title {
+      font-size: 1.1rem;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .brand-title span.badge {
+      font-size: 0.68rem;
+      font-weight: 600;
+      padding: 2px 7px;
+      border-radius: var(--radius-full);
+      background: var(--primary-light);
+      color: var(--primary);
+    }
+
+    .top-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .star-counter {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      background: #fef3c7;
+      color: #b45309;
+      padding: 4px 10px;
+      border-radius: var(--radius-full);
+      font-size: 0.8rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: transform 0.1s;
+    }
+    .star-counter:active {
+      transform: scale(0.95);
+    }
+
+    .icon-btn {
+      background: none;
+      border: none;
+      font-size: 1.15rem;
+      cursor: pointer;
+      color: var(--text-sub);
+      padding: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: var(--radius-sm);
+    }
+    .icon-btn:hover {
+      background: var(--bg-subtle);
+    }
+
+    /* 메인 스크롤 */
+    main {
+      flex: 1;
+      overflow-y: auto;
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+    }
+
+    .screen {
+      display: none;
+      flex-direction: column;
+      height: 100%;
+      animation: fadeIn 0.2s ease-out;
+    }
+    .screen.active {
+      display: flex;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* 카드 스타일 */
+    .card {
+      background: var(--bg-card);
+      border-radius: var(--radius-md);
+      padding: 14px 16px;
+      margin-bottom: 12px;
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .card-title {
+      font-size: 0.92rem;
+      font-weight: 700;
+      color: var(--text-main);
+      margin-bottom: 8px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    /* 시간 설정 영역 */
+    .time-selector-header {
+      margin-bottom: 12px;
+    }
+    .time-selector-header h2 {
+      font-size: 1.3rem;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+      color: var(--text-main);
+      margin-bottom: 2px;
+    }
+    .time-selector-header p {
+      font-size: 0.8rem;
+      color: var(--text-sub);
+    }
+
+    .quick-time-buttons {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 6px;
+      margin-bottom: 10px;
+    }
+
+    .btn-time {
+      background: var(--bg-subtle);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 8px 2px;
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: var(--text-sub);
+      cursor: pointer;
+      transition: all 0.15s ease;
+      text-align: center;
+    }
+    .btn-time.selected {
+      background: var(--primary);
+      color: #ffffff;
+      border-color: var(--primary);
+      box-shadow: 0 2px 6px rgba(79, 70, 229, 0.3);
+    }
+
+    .time-slider-val {
+      font-size: 1.1rem;
+      font-weight: 800;
+      color: var(--primary);
+      text-align: right;
+    }
+    input[type=range] {
+      width: 100%;
+      accent-color: var(--primary);
+      cursor: pointer;
+    }
+
+    /* 활동 추천 목록 */
+    .section-label {
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      margin: 8px 0 6px 2px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .activity-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 13px 15px;
+      margin-bottom: 10px;
+      cursor: pointer;
+      transition: transform 0.15s, box-shadow 0.15s, border-color 0.15s;
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+    }
+    .activity-card:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-md);
+    }
+    .activity-card.recommended {
+      border: 1.5px solid var(--primary);
+      background: linear-gradient(to bottom, #ffffff, var(--primary-light));
+    }
+
+    .card-top-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .act-title-wrap {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .act-emoji {
+      font-size: 1.35rem;
+      width: 36px;
+      height: 36px;
+      border-radius: 10px;
+      background: var(--bg-subtle);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .act-name {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: var(--text-main);
+    }
+
+    .badge-wrap {
+      display: flex;
+      gap: 4px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+    .badge-frequent {
+      font-size: 0.68rem;
+      font-weight: 700;
+      padding: 2px 6px;
+      border-radius: var(--radius-full);
+      background: #fef3c7;
+      color: #b45309;
+      border: 1px solid #fde68a;
+    }
+    .badge-giveup {
+      font-size: 0.68rem;
+      font-weight: 700;
+      padding: 2px 6px;
+      border-radius: var(--radius-full);
+      background: var(--danger-light);
+      color: var(--danger);
+      border: 1px solid #fecaca;
+    }
+    .badge-rec {
+      font-size: 0.68rem;
+      font-weight: 700;
+      padding: 2px 6px;
+      border-radius: var(--radius-full);
+      background: var(--primary);
+      color: #ffffff;
+    }
+
+    .act-desc {
+      font-size: 0.8rem;
+      color: var(--text-sub);
+      line-height: 1.35;
+    }
+    .act-meta {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 0.72rem;
+      color: var(--text-muted);
+      margin-top: 4px;
+      padding-top: 5px;
+      border-top: 1px dashed var(--border);
+    }
+
+    /* 게임 플레이 상단 활동 헤더 (타이머 없이 깔끔한 배너) */
+    .activity-top-header {
+      background: var(--bg-card);
+      border-radius: var(--radius-md);
+      padding: 10px 14px;
+      border: 1px solid var(--border);
+      margin-bottom: 10px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .activity-top-title {
+      font-weight: 800;
+      font-size: 0.95rem;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      color: var(--text-main);
+    }
+    .activity-top-status {
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--primary);
+      background: var(--primary-light);
+      padding: 3px 8px;
+      border-radius: var(--radius-full);
+    }
+
+    .play-content {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      background: var(--bg-card);
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border);
+      overflow: hidden;
+      position: relative;
+    }
+    .play-footer {
+      display: flex;
+      gap: 8px;
+      margin-top: 10px;
+    }
+    .btn-giveup {
+      flex: 1;
+      background: var(--danger-light);
+      color: var(--danger);
+      border: 1px solid #fecaca;
+      border-radius: var(--radius-md);
+      padding: 12px;
+      font-size: 0.92rem;
+      font-weight: 700;
+      cursor: pointer;
+    }
+    .btn-complete {
+      flex: 2;
+      background: var(--primary);
+      color: #ffffff;
+      border: none;
+      border-radius: var(--radius-md);
+      padding: 12px;
+      font-size: 0.92rem;
+      font-weight: 700;
+      cursor: pointer;
+      box-shadow: 0 4px 10px rgba(79, 70, 229, 0.3);
+    }
+
+    /* 1. 동물 멍때리기 (최대 10마리 10종) */
+    #chill-viewport {
+      width: 100%;
+      height: 100%;
+      min-height: 380px;
+      background: linear-gradient(180deg, #bae6fd 0%, #bbf7d0 50%, #86efac 100%);
+      position: relative;
+      overflow: hidden;
+      cursor: pointer;
+    }
+    .cloud {
+      position: absolute;
+      background: rgba(255, 255, 255, 0.85);
+      border-radius: var(--radius-full);
+      filter: blur(1px);
+      animation: floatCloud 24s linear infinite;
+    }
+    @keyframes floatCloud {
+      from { transform: translateX(-120px); }
+      to { transform: translateX(450px); }
+    }
+    .animal-actor {
+      position: absolute;
+      width: 60px;
+      height: 60px;
+      transition: transform 1.2s cubic-bezier(0.25, 1, 0.5, 1);
+      cursor: pointer;
+      filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));
+    }
+    .heart-bubble {
+      position: absolute;
+      font-size: 1.4rem;
+      animation: heartPop 0.9s forwards ease-out;
+      pointer-events: none;
+      z-index: 15;
+    }
+    @keyframes heartPop {
+      0% { transform: scale(0.4) translateY(0); opacity: 1; }
+      100% { transform: scale(1.4) translateY(-50px); opacity: 0; }
+    }
+    .breathe-guide {
+      position: absolute;
+      bottom: 12px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(255, 255, 255, 0.92);
+      backdrop-filter: blur(4px);
+      padding: 6px 14px;
+      border-radius: var(--radius-full);
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: var(--text-sub);
+      box-shadow: var(--shadow-sm);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      white-space: nowrap;
+      pointer-events: none;
+    }
+    .breathe-circle {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: var(--primary);
+      animation: breatheAnim 6s infinite ease-in-out;
+    }
+    @keyframes breatheAnim {
+      0%, 100% { transform: scale(0.8); opacity: 0.4; }
+      50% { transform: scale(1.6); opacity: 1; }
+    }
+
+    /* 2. 별 모으기 (최대 10개 10색상) */
+    #star-field {
+      width: 100%;
+      height: 100%;
+      min-height: 380px;
+      background: radial-gradient(circle at 50% 30%, #1e1b4b 0%, #0f172a 100%);
+      position: relative;
+      overflow: hidden;
+      cursor: crosshair;
+    }
+    .spawned-star {
+      position: absolute;
+      width: 42px;
+      height: 42px;
+      cursor: pointer;
+      animation: twinkle 1.4s infinite alternate ease-in-out;
+      transition: transform 0.1s;
+    }
+    .spawned-star:active {
+      transform: scale(0.85);
+    }
+    @keyframes twinkle {
+      0% { opacity: 0.7; transform: scale(0.92); }
+      100% { opacity: 1; transform: scale(1.08); }
+    }
+    .star-click-effect {
+      position: absolute;
+      font-weight: 800;
+      font-size: 1rem;
+      pointer-events: none;
+      animation: floatUp 0.7s forwards ease-out;
+      z-index: 10;
+    }
+    @keyframes floatUp {
+      0% { transform: translateY(0); opacity: 1; }
+      100% { transform: translateY(-40px); opacity: 0; }
+    }
+    .star-score-banner {
+      position: absolute;
+      top: 12px;
+      left: 12px;
+      background: rgba(15, 23, 42, 0.82);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      backdrop-filter: blur(6px);
+      padding: 5px 12px;
+      border-radius: var(--radius-full);
+      color: #ffffff;
+      font-size: 0.82rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      z-index: 5;
+    }
+
+    /* 3. 네모칸 색칠 게임 (가변 크기 & 7종 도안) */
+    .color-game-wrap {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 10px;
+      gap: 8px;
+      height: 100%;
+      justify-content: space-between;
+    }
+    .color-game-tools {
+      width: 100%;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 4px;
+    }
+    .template-select {
+      padding: 5px 8px;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border);
+      font-size: 0.78rem;
+      font-weight: 600;
+      background: var(--bg-subtle);
+      color: var(--text-main);
+      cursor: pointer;
+    }
+    .grid-board {
+      display: grid;
+      grid-gap: 2px;
+      background: #cbd5e1;
+      padding: 3px;
+      border-radius: 8px;
+      box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.08);
+      touch-action: none;
+      margin: auto;
+    }
+    .grid-cell {
+      background: #ffffff;
+      border-radius: 2px;
+      cursor: pointer;
+      transition: background-color 0.05s;
+    }
+    .palette-row {
+      display: flex;
+      gap: 5px;
+      padding: 4px 6px;
+      background: var(--bg-subtle);
+      border-radius: var(--radius-full);
+      border: 1px solid var(--border);
+      overflow-x: auto;
+      max-width: 100%;
+    }
+    .palette-swatch {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      border: 2px solid #ffffff;
+      box-shadow: 0 0 0 1px var(--border);
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+    .palette-swatch.active {
+      transform: scale(1.2);
+      box-shadow: 0 0 0 2.5px var(--text-main);
+    }
+    .btn-sub-tool {
+      background: var(--bg-subtle);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 5px 8px;
+      font-size: 0.74rem;
+      font-weight: 600;
+      color: var(--text-sub);
+      cursor: pointer;
+    }
+
+    /* 4. 🫧 뽁뽁이 터뜨리기 */
+    .bubble-wrap-area {
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+      height: 100%;
+      justify-content: center;
+    }
+    .bubble-stats {
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: var(--text-sub);
+      display: flex;
+      gap: 12px;
+    }
+    .bubble-grid {
+      display: grid;
+      grid-template-columns: repeat(6, 1fr);
+      gap: 10px;
+      padding: 14px;
+      background: #e2e8f0;
+      border-radius: var(--radius-lg);
+      box-shadow: inset 0 2px 5px rgba(0,0,0,0.06);
+    }
+    .bubble-cell {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      background: radial-gradient(circle at 35% 35%, #ffffff 0%, #cbd5e1 50%, #94a3b8 100%);
+      box-shadow: 0 3px 6px rgba(0,0,0,0.12), inset 0 2px 3px rgba(255,255,255,0.8);
+      cursor: pointer;
+      touch-action: manipulation;
+      user-select: none;
+      -webkit-user-select: none;
+      transition: transform 0.1s;
+    }
+    .bubble-cell:active {
+      transform: scale(0.9);
+    }
+    .bubble-cell.popped {
+      background: #94a3b8;
+      box-shadow: inset 0 3px 6px rgba(0,0,0,0.25);
+      transform: scale(0.88);
+      opacity: 0.6;
+      cursor: default;
+    }
+    .bubble-cell.golden {
+      background: radial-gradient(circle at 35% 35%, #fef08a 0%, #facc15 60%, #ca8a04 100%);
+      box-shadow: 0 0 10px rgba(250, 204, 21, 0.8);
+      animation: pulseGlow 1.5s infinite alternate;
+    }
+    .bubble-cell.rainbow {
+      background: linear-gradient(135deg, #f43f5e, #fb923c, #facc15, #10b981, #06b6d4, #8b5cf6);
+      box-shadow: 0 0 12px rgba(244, 63, 94, 0.7);
+      animation: rainbowGlow 1.8s infinite alternate;
+    }
+    @keyframes pulseGlow {
+      from { transform: scale(1); filter: brightness(1); }
+      to { transform: scale(1.05); filter: brightness(1.2); }
+    }
+    @keyframes rainbowGlow {
+      0% { transform: scale(1); filter: hue-rotate(0deg); }
+      100% { transform: scale(1.06); filter: hue-rotate(360deg); }
+    }
+
+    /* 5. 🗑️ 걱정 분쇄기 */
+    .shredder-area {
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+      height: 100%;
+      justify-content: center;
+    }
+    .worry-paper {
+      width: 100%;
+      max-width: 300px;
+      background: #fffbeb;
+      border: 1px solid #fef3c7;
+      border-radius: var(--radius-sm);
+      box-shadow: var(--shadow-md);
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      transition: transform 0.8s, opacity 0.8s;
+    }
+    .worry-paper textarea {
+      width: 100%;
+      height: 90px;
+      background: transparent;
+      border: none;
+      resize: none;
+      outline: none;
+      font-size: 0.88rem;
+      font-family: inherit;
+      color: #78350f;
+    }
+    .shredder-slot {
+      width: 100%;
+      max-width: 320px;
+      height: 24px;
+      background: #1e293b;
+      border-radius: 4px;
+      box-shadow: inset 0 2px 4px rgba(0,0,0,0.5);
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .shredder-slit {
+      width: 90%;
+      height: 4px;
+      background: #0f172a;
+      border-radius: 2px;
+    }
+    .btn-shred {
+      background: var(--danger);
+      color: #ffffff;
+      border: none;
+      padding: 10px 20px;
+      border-radius: var(--radius-md);
+      font-size: 0.88rem;
+      font-weight: 700;
+      cursor: pointer;
+      box-shadow: 0 4px 10px rgba(239, 68, 68, 0.3);
+    }
+
+    /* 6. ⏳ 감성 모래시계 & 명상 */
+    .sand-area {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100%;
+      padding: 16px;
+      gap: 16px;
+      background: linear-gradient(180deg, #f8fafc 0%, #e2e8f0 100%);
+    }
+    #sand-canvas {
+      width: 220px;
+      height: 240px;
+      background: transparent;
+    }
+    .sand-quote {
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--text-sub);
+      text-align: center;
+      line-height: 1.5;
+      padding: 0 10px;
+      min-height: 45px;
+    }
+
+    /* 7. 🧩 카드 짝맞추기 (16, 24, 32, 64장 가변 그리드) */
+    .card-match-area {
+      padding: 10px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+      height: 100%;
+      justify-content: space-between;
+    }
+    .card-tools {
+      width: 100%;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0 4px;
+    }
+    .card-scroll-wrap {
+      flex: 1;
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow-y: auto;
+      max-height: 440px;
+      padding: 4px;
+    }
+    .card-grid {
+      display: grid;
+      gap: 6px;
+      width: 100%;
+      margin: auto;
+    }
+    .card-grid.grid-16 {
+      grid-template-columns: repeat(4, 1fr);
+      max-width: 310px;
+    }
+    .card-grid.grid-24 {
+      grid-template-columns: repeat(4, 1fr);
+      max-width: 310px;
+    }
+    .card-grid.grid-32 {
+      grid-template-columns: repeat(4, 1fr);
+      max-width: 320px;
+    }
+    .card-grid.grid-64 {
+      grid-template-columns: repeat(8, 1fr);
+      max-width: 380px;
+      gap: 3px;
+    }
+    .flip-card {
+      aspect-ratio: 1;
+      background: var(--primary-light);
+      border: 1.5px solid var(--primary);
+      border-radius: var(--radius-sm);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.4rem;
+      cursor: pointer;
+      transition: transform 0.15s, background 0.15s;
+    }
+    .card-grid.grid-32 .flip-card {
+      font-size: 1.25rem;
+    }
+    .card-grid.grid-64 .flip-card {
+      font-size: 0.95rem;
+      border-radius: 4px;
+      border-width: 1px;
+    }
+    .flip-card.hidden-card {
+      background: var(--primary);
+      color: transparent;
+      border-color: var(--primary-hover);
+    }
+    .flip-card.matched {
+      background: #ecfdf5;
+      border-color: #10b981;
+      cursor: default;
+    }
+
+    /* 8. 🪴 공강 화분 키우기 (15단계 & 물/햇빛 밸런스 시스템) */
+    .plant-area {
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: space-between;
+      height: 100%;
+      background: linear-gradient(180deg, #fefce8 0%, #ecfdf5 100%);
+    }
+    .plant-balance-bar {
+      width: 100%;
+      background: rgba(255, 255, 255, 0.9);
+      backdrop-filter: blur(4px);
+      padding: 8px 12px;
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.76rem;
+      font-weight: 700;
+    }
+    .balance-tag {
+      padding: 2px 8px;
+      border-radius: var(--radius-full);
+      font-size: 0.7rem;
+    }
+    .balance-tag.good { background: #dcfce7; color: #15803d; }
+    .balance-tag.warn { background: #fee2e2; color: #b91c1c; }
+    .plant-avatar {
+      width: 180px;
+      height: 180px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      filter: drop-shadow(0 4px 10px rgba(0,0,0,0.1));
+      transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+    .plant-info-card {
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+    .plant-stage-text {
+      font-size: 0.98rem;
+      font-weight: 800;
+      color: #065f46;
+    }
+    .plant-desc-text {
+      font-size: 0.76rem;
+      color: #047857;
+    }
+    .plant-actions {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 2px;
+    }
+    .btn-care {
+      background: #ffffff;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-full);
+      padding: 9px 18px;
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: var(--text-main);
+      cursor: pointer;
+      box-shadow: var(--shadow-sm);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: transform 0.1s;
+    }
+    .btn-care:active {
+      transform: scale(0.95);
+    }
+
+    /* 하단 테스트 툴바 */
+    .test-toolbar {
+      background: #0f172a;
+      color: #94a3b8;
+      padding: 7px 12px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 0.7rem;
+      border-top: 1px solid #1e293b;
+      flex-wrap: wrap;
+      gap: 4px;
+    }
+    .test-toolbar .title {
+      font-weight: 700;
+      color: #f1f5f9;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .test-buttons {
+      display: flex;
+      gap: 3px;
+      flex-wrap: wrap;
+    }
+    .btn-test {
+      background: #1e293b;
+      color: #e2e8f0;
+      border: 1px solid #334155;
+      padding: 3px 5px;
+      border-radius: 4px;
+      font-size: 0.65rem;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    .btn-test.highlight {
+      background: #4f46e5;
+      border-color: #6366f1;
+      color: #ffffff;
+    }
+
+    /* 모달 & 토스트 */
+    .modal-overlay {
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0, 0, 0, 0.45);
+      backdrop-filter: blur(2px);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 100;
+      padding: 20px;
+    }
+    .modal-overlay.active { display: flex; }
+    .modal-card {
+      background: var(--bg-card);
+      border-radius: var(--radius-lg);
+      padding: 18px;
+      width: 100%;
+      max-width: 320px;
+      box-shadow: var(--shadow-lg);
+    }
+    .modal-title { font-size: 1.05rem; font-weight: 800; margin-bottom: 6px; }
+    .modal-body { font-size: 0.82rem; color: var(--text-sub); margin-bottom: 14px; line-height: 1.5; }
+    .modal-actions { display: flex; gap: 8px; }
+    .btn-modal { flex: 1; padding: 9px; border-radius: var(--radius-md); font-size: 0.85rem; font-weight: 700; cursor: pointer; border: none; }
+    .btn-modal-primary { background: var(--primary); color: #ffffff; }
+    .btn-modal-secondary { background: var(--bg-subtle); color: var(--text-sub); border: 1px solid var(--border); }
+
+    .theme-list { display: flex; flex-direction: column; gap: 6px; margin-bottom: 14px; }
+    .theme-item {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 8px 10px; border: 1px solid var(--border); border-radius: var(--radius-sm);
+      cursor: pointer; font-size: 0.82rem; font-weight: 600;
+    }
+    .theme-item.active { border-color: var(--primary); background: var(--primary-light); }
+    .theme-item.locked { opacity: 0.55; cursor: not-allowed; }
+
+    .toast-notice {
+      position: absolute; top: 60px; left: 50%;
+      transform: translateX(-50%);
+      background: #0f172a; color: #f8fafc;
+      padding: 8px 14px; border-radius: var(--radius-full);
+      font-size: 0.78rem; font-weight: 600;
+      box-shadow: var(--shadow-md); display: none; z-index: 90;
+      white-space: nowrap; pointer-events: none;
+    }
+  </style>
+</head>
+<body data-theme="default">
+
+  <div id="app-container">
+    <div id="toast" class="toast-notice">알림</div>
+
+    <!-- 상단 헤더 -->
+    <header>
+      <div class="brand-title">
+        ☕ 쉬는타임 <span class="badge">공강 쉼터</span>
+      </div>
+      <div class="top-actions">
+        <div class="star-counter" id="btn-theme-shop" title="별 테마 샵">
+          <span>★</span> <span id="global-star-count">0</span>
+        </div>
+        <button class="icon-btn" id="btn-reset-view" title="홈으로">🏠</button>
+      </div>
+    </header>
+
+    <!-- 메인 컨텐츠 화면 -->
+    <main>
+      <!-- 0. 홈: 시간 선택 & 추천 목록 (추천 기능 100% 유지) -->
+      <section id="screen-home" class="screen active">
+        <div class="time-selector-header">
+          <h2>지금 남은 공강은?</h2>
+          <p>식사 및 강의실 이동 시간을 뺀 자유 시간을 선택하세요.</p>
+        </div>
+
+        <div class="card">
+          <div class="card-title">
+            <span>⏱ 남은 공강 시간</span>
+            <span class="time-slider-val" id="time-display-val">15분</span>
+          </div>
+          <div class="quick-time-buttons">
+            <button class="btn-time" data-mins="5">5분</button>
+            <button class="btn-time" data-mins="10">10분</button>
+            <button class="btn-time selected" data-mins="15">15분</button>
+            <button class="btn-time" data-mins="20">20분</button>
+            <button class="btn-time" data-mins="30">30분</button>
+            <button class="btn-time" data-mins="45">45분</button>
+            <button class="btn-time" data-mins="60">60분</button>
+            <button class="btn-time" data-mins="90">90분</button>
+            <button class="btn-time" data-mins="120">120분</button>
+            <button class="btn-time" data-mins="180">180분</button>
+            <button class="btn-time" data-mins="240">240분</button>
+          </div>
+          <input type="range" id="time-range-slider" min="5" max="240" step="5" value="15">
+        </div>
+
+        <div class="section-label">
+          <span>맞춤 추천 힐링 활동 (8종)</span>
+          <span style="font-size: 0.72rem; font-weight: normal; color: var(--text-muted);">추천 우선 · 포기 적은 순</span>
+        </div>
+
+        <div id="activity-card-list"></div>
+      </section>
+
+      <!-- 1. 동물 멍때리기 (타이머 삭제 -> 심플 헤더) -->
+      <section id="screen-animal" class="screen">
+        <div class="activity-top-header">
+          <div class="activity-top-title">🌿 동물 멍때리기 (10마리)</div>
+          <div class="activity-top-status">자유 힐링 중</div>
+        </div>
+        <div class="play-content">
+          <div id="chill-viewport">
+            <div class="cloud" style="top: 20px; width: 65px; height: 22px;"></div>
+            <div class="cloud" style="top: 50px; width: 85px; height: 28px; animation-delay: -10s;"></div>
+            <div class="breathe-guide">
+              <div class="breathe-circle"></div>
+              <span>동물들을 보며 편안하게 숨을 쉬어보세요</span>
+            </div>
+          </div>
+        </div>
+        <div class="play-footer">
+          <button class="btn-giveup" onclick="app.giveUp('animal_chill')">포기</button>
+          <button class="btn-complete" onclick="app.complete('animal_chill')">활동 완료 ✓</button>
+        </div>
+      </section>
+
+      <!-- 2. 랜덤 별 모으기 -->
+      <section id="screen-stars" class="screen">
+        <div class="activity-top-header">
+          <div class="activity-top-title">✨ 랜덤 별 모으기 (10색상)</div>
+          <div class="activity-top-status">자유 수집 중</div>
+        </div>
+        <div class="play-content">
+          <div id="star-field">
+            <div class="star-score-banner">
+              <span>수집한 별:</span>
+              <strong id="session-stars-count" style="color: #fde047;">0</strong>개
+            </div>
+          </div>
+        </div>
+        <div class="play-footer">
+          <button class="btn-giveup" onclick="app.giveUp('star_collector')">포기</button>
+          <button class="btn-complete" onclick="app.complete('star_collector')">활동 완료 ✓</button>
+        </div>
+      </section>
+
+      <!-- 3. 네모칸 색칠 게임 -->
+      <section id="screen-coloring" class="screen">
+        <div class="activity-top-header">
+          <div class="activity-top-title">🎨 네모칸 색칠 게임</div>
+          <div class="activity-top-status">컬러링 중</div>
+        </div>
+        <div class="play-content">
+          <div class="color-game-wrap">
+            <div class="color-game-tools">
+              <select class="template-select" id="canvas-template-sel" onchange="colorGame.loadTemplate(this.value)">
+                <option value="heart">[8x8] 빨간 하트</option>
+                <option value="clover">[8x8] 행운 클로버</option>
+                <option value="paw">[10x10] 고양이 발바닥</option>
+                <option value="apple">[10x10] 달콤한 사과</option>
+                <option value="star">[10x10] 반짝이는 별</option>
+                <option value="bear">[12x12] 아기 곰돌이</option>
+                <option value="rainbow">[12x12] 파스텔 무지개</option>
+                <option value="free_8">[자유] 8x8 캔버스</option>
+                <option value="free_10">[자유] 10x10 캔버스</option>
+                <option value="free_12">[자유] 12x12 캔버스</option>
+                <option value="free_16">[자유] 16x16 캔버스</option>
+              </select>
+              <div class="color-action-btns">
+                <button class="btn-sub-tool" onclick="colorGame.clear()">지우기</button>
+              </div>
+            </div>
+            <div class="grid-board" id="pixel-grid"></div>
+            <div class="palette-row" id="color-palette"></div>
+          </div>
+        </div>
+        <div class="play-footer">
+          <button class="btn-giveup" onclick="app.giveUp('grid_color')">포기</button>
+          <button class="btn-complete" onclick="app.complete('grid_color')">활동 완료 ✓</button>
+        </div>
+      </section>
+
+      <!-- 4. 🫧 뽁뽁이 터뜨리기 -->
+      <section id="screen-bubble" class="screen">
+        <div class="activity-top-header">
+          <div class="activity-top-title">🫧 뽁뽁이 터뜨리기</div>
+          <div class="activity-top-status">힐링 중</div>
+        </div>
+        <div class="play-content">
+          <div class="bubble-wrap-area">
+            <div class="bubble-stats">
+              <span>터뜨린 수: <strong id="bubble-pop-count" style="color: var(--primary);">0</strong>개</span>
+              <span style="font-size:0.75rem; color:var(--text-muted);">(황금 ★+5 / 무지개 ★+15)</span>
+            </div>
+            <div class="bubble-grid" id="bubble-grid"></div>
+            <button class="btn-sub-tool" onclick="bubbleGame.refill()" style="margin-top: 6px;">새 뽁뽁이 리필</button>
+          </div>
+        </div>
+        <div class="play-footer">
+          <button class="btn-giveup" onclick="app.giveUp('bubble_pop')">포기</button>
+          <button class="btn-complete" onclick="app.complete('bubble_pop')">활동 완료 ✓</button>
+        </div>
+      </section>
+
+      <!-- 5. 🗑️ 걱정 분쇄기 -->
+      <section id="screen-shredder" class="screen">
+        <div class="activity-top-header">
+          <div class="activity-top-title">🗑️ 걱정 분쇄기</div>
+          <div class="activity-top-status">마음 정리 중</div>
+        </div>
+        <div class="play-content">
+          <div class="shredder-area">
+            <div class="worry-paper" id="worry-paper">
+              <span style="font-size: 0.75rem; font-weight: 700; color: #92400e; margin-bottom: 4px;">📝 나를 괴롭히는 걱정·과제 적기</span>
+              <textarea id="worry-input" placeholder="여기에 과제 스트레스, 걱정되는 일을 적고 아래 분쇄기에 넣어버리세요..."></textarea>
+            </div>
+            <div class="shredder-slot">
+              <div class="shredder-slit"></div>
+            </div>
+            <button class="btn-shred" onclick="shredderGame.shred()">시원하게 분쇄하기 ✂️</button>
+          </div>
+        </div>
+        <div class="play-footer">
+          <button class="btn-giveup" onclick="app.giveUp('paper_shredder')">포기</button>
+          <button class="btn-complete" onclick="app.complete('paper_shredder')">활동 완료 ✓</button>
+        </div>
+      </section>
+
+      <!-- 6. ⏳ 감성 모래시계 & 명상 -->
+      <section id="screen-sand" class="screen">
+        <div class="activity-top-header">
+          <div class="activity-top-title">⏳ 감성 모래시계 & 명상</div>
+          <div class="activity-top-status">마인드풀니스</div>
+        </div>
+        <div class="play-content">
+          <div class="sand-area">
+            <canvas id="sand-canvas" width="220" height="240"></canvas>
+            <div class="sand-quote" id="sand-quote">마음을 비우고 천천히 떨어지는 모래를 바라보세요.</div>
+          </div>
+        </div>
+        <div class="play-footer">
+          <button class="btn-giveup" onclick="app.giveUp('zen_sand')">포기</button>
+          <button class="btn-complete" onclick="app.complete('zen_sand')">활동 완료 ✓</button>
+        </div>
+      </section>
+
+      <!-- 7. 🧩 카드 짝맞추기 -->
+      <section id="screen-card" class="screen">
+        <div class="activity-top-header">
+          <div class="activity-top-title">🧩 카드 짝맞추기</div>
+          <div class="activity-top-status">두뇌 퍼즐 중</div>
+        </div>
+        <div class="play-content">
+          <div class="card-match-area">
+            <div class="card-tools">
+              <select class="template-select" id="card-count-sel" onchange="cardMatchGame.setCount(parseInt(this.value, 10))">
+                <option value="16">16장 (4x4, 8쌍)</option>
+                <option value="24">24장 (4x6, 12쌍)</option>
+                <option value="32">32장 (4x8, 16쌍)</option>
+                <option value="64">64장 (8x8, 32쌍 마스터)</option>
+              </select>
+              <button class="btn-sub-tool" onclick="cardMatchGame.start()">다시 섞기 🔄</button>
+            </div>
+            <div class="card-scroll-wrap">
+              <div class="card-grid grid-16" id="card-grid"></div>
+            </div>
+          </div>
+        </div>
+        <div class="play-footer">
+          <button class="btn-giveup" onclick="app.giveUp('card_match')">포기</button>
+          <button class="btn-complete" onclick="app.complete('card_match')">활동 완료 ✓</button>
+        </div>
+      </section>
+
+      <!-- 8. 🪴 나만의 공강 화분 키우기 (15단계 & 물/햇빛 밸런스) -->
+      <section id="screen-plant" class="screen">
+        <div class="activity-top-header">
+          <div class="activity-top-title">🪴 공강 화분 키우기</div>
+          <div class="activity-top-status" id="plant-level-badge">1 / 15 단계</div>
+        </div>
+        <div class="play-content">
+          <div class="plant-area">
+            <div class="plant-balance-bar">
+              <span>💧 수분: <strong id="plant-water-val">0</strong></span>
+              <span id="plant-balance-status" class="balance-tag good">균형 상태 🌿</span>
+              <span>☀️ 일조량: <strong id="plant-sun-val">0</strong></span>
+            </div>
+            <div class="plant-avatar" id="plant-avatar"></div>
+            <div class="plant-info-card">
+              <div class="plant-stage-text" id="plant-stage-text">1단계: 포근한 흙 속 씨앗</div>
+              <div class="plant-desc-text" id="plant-desc-text">물과 햇빛을 번갈아가며 균형 있게 주어야 자랍니다. (편중 시 하락)</div>
+            </div>
+            <div class="plant-actions">
+              <button class="btn-care" onclick="plantGame.giveWater()">💧 물주기</button>
+              <button class="btn-care" onclick="plantGame.giveSun()">☀️ 햇빛 쬐기</button>
+            </div>
+          </div>
+        </div>
+        <div class="play-footer">
+          <button class="btn-giveup" onclick="app.giveUp('study_plant')">포기</button>
+          <button class="btn-complete" onclick="app.complete('study_plant')">활동 완료 ✓</button>
+        </div>
+      </section>
+    </main>
+
+    <!-- 하단 테스트 툴바 -->
+    <div class="test-toolbar">
+      <div class="title">🛠 테스트</div>
+      <div class="test-buttons">
+        <button class="btn-test" onclick="app.resetTime()">시간리셋</button>
+        <button class="btn-test" onclick="app.restartActiveActivity()">다시하기</button>
+        <button class="btn-test highlight" onclick="app.trigger10MinInactivity()">방치완료</button>
+        <button class="btn-test" onclick="app.testAddFrequentBadge()">+5회완료</button>
+        <button class="btn-test" onclick="app.testAddGiveupBadge()">+10회포기</button>
+        <button class="btn-test" onclick="app.resetAllData()">초기화</button>
+      </div>
+    </div>
+
+    <!-- 모달들 -->
+    <div class="modal-overlay" id="modal-theme">
+      <div class="modal-card">
+        <h3 class="modal-title">⭐ 별 테마 샵</h3>
+        <p class="modal-body">별 모으기에서 모은 별로 테마를 해금해보세요!</p>
+        <div class="theme-list" id="theme-shop-list"></div>
+        <div class="modal-actions">
+          <button class="btn-modal btn-modal-secondary" onclick="app.closeModal('modal-theme')">닫기</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal-overlay" id="modal-alert">
+      <div class="modal-card">
+        <h3 class="modal-title" id="alert-modal-title">활동 완료!</h3>
+        <p class="modal-body" id="alert-modal-desc">알림 설명</p>
+        <div class="modal-actions">
+          <button class="btn-modal btn-modal-primary" onclick="app.closeModal('modal-alert')">확인</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    /* ==========================================================================
+       1. 데이터 스키마 & LocalStorage
+       ========================================================================== */
+    const STORAGE_KEY = 'breaktime_app_data_v2';
+
+    const defaultData = {
+      user_settings: {
+        total_stars: 0,
+        current_theme: 'default',
+        unlocked_themes: ['default']
+      },
+      activities: {
+        bubble_pop: {
+          id: 'bubble_pop',
+          name: '뽁뽁이 터뜨리기',
+          emoji: '🫧',
+          desc: '무한 리필되는 버블랩을 톡톡 터뜨리며 가볍게 스트레스를 날려보세요.',
+          use_count: 0, giveup_count: 0, last_used_date: null
+        },
+        star_collector: {
+          id: 'star_collector',
+          name: '랜덤 별 모으기',
+          emoji: '✨',
+          desc: '화면에 나타나는 10가지 색상의 별을 터치해 수집하고 테마를 해금하세요.',
+          use_count: 0, giveup_count: 0, last_used_date: null
+        },
+        animal_chill: {
+          id: 'animal_chill',
+          name: '동물 멍때리기',
+          emoji: '🌿',
+          desc: '10마리의 고양이와 강아지가 노니는 잔디밭을 보며 편안히 멍때려보세요.',
+          use_count: 0, giveup_count: 0, last_used_date: null
+        },
+        paper_shredder: {
+          id: 'paper_shredder',
+          name: '걱정 분쇄기',
+          emoji: '🗑️',
+          desc: '과제나 고민을 메모에 적고 분쇄기로 갈아버리며 마음을 정리하세요.',
+          use_count: 0, giveup_count: 0, last_used_date: null
+        },
+        zen_sand: {
+          id: 'zen_sand',
+          name: '감성 모래시계',
+          emoji: '⏳',
+          desc: '스르륵 떨어지는 모래 입자를 보며 눈의 피로를 풀고 마인드풀니스를 즐기세요.',
+          use_count: 0, giveup_count: 0, last_used_date: null
+        },
+        card_match: {
+          id: 'card_match',
+          name: '카드 짝맞추기',
+          emoji: '🧩',
+          desc: '12장의 귀여운 카드를 뒤집어 짝을 맞추며 가볍게 두뇌를 깨워보세요.',
+          use_count: 0, giveup_count: 0, last_used_date: null
+        },
+        grid_color: {
+          id: 'grid_color',
+          name: '네모칸 색칠 게임',
+          emoji: '🎨',
+          desc: '7가지 도안과 가변 크기 캔버스에 나만의 색을 채우는 픽셀 컬러링.',
+          use_count: 0, giveup_count: 0, last_used_date: null
+        },
+        study_plant: {
+          id: 'study_plant',
+          name: '공강 화분 키우기',
+          emoji: '🪴',
+          desc: '공강 동안 독서나 자습을 할 때 함께 자라는 나만의 타이머 반려 식물.',
+          use_count: 0, giveup_count: 0, last_used_date: null
+        }
+      }
+    };
+
+    function loadAppData() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (raw) {
+          const parsed = JSON.parse(raw);
+          if (parsed && parsed.activities && parsed.user_settings) {
+            // 8개 활동이 누락 없이 안전하게 로드되도록 기본 데이터와 병합
+            const merged = JSON.parse(JSON.stringify(defaultData));
+            merged.user_settings = { ...merged.user_settings, ...parsed.user_settings };
+            Object.keys(merged.activities).forEach(actId => {
+              if (parsed.activities[actId]) {
+                merged.activities[actId].use_count = parsed.activities[actId].use_count || 0;
+                merged.activities[actId].giveup_count = parsed.activities[actId].giveup_count || 0;
+                merged.activities[actId].last_used_date = parsed.activities[actId].last_used_date || null;
+              }
+            });
+            return merged;
+          }
+        }
+      } catch (e) {}
+      return JSON.parse(JSON.stringify(defaultData));
+    }
+
+    function saveAppData(data) {
+      try { localStorage.setItem(STORAGE_KEY, JSON.stringify(data)); } catch (e) {}
+    }
+
+    /* ==========================================================================
+       2. 메인 컨트롤러 (App Engine)
+       ========================================================================== */
+    const app = {
+      state: {
+        data: loadAppData(),
+        selectedMinutes: 15,
+        currentScreen: 'home',
+        activeActivityId: null,
+        lastInteractionTime: Date.now()
+      },
+
+      init() {
+        this.applyTheme(this.state.data.user_settings.current_theme || 'default');
+        this.updateStarCounterUI();
+        this.setupTimeInputEvents();
+        this.renderActivityCards();
+        this.setupGlobalInactivityWatcher();
+
+        document.getElementById('btn-reset-view').onclick = () => this.showScreen('home');
+        document.getElementById('btn-theme-shop').onclick = () => this.openThemeShop();
+      },
+
+      showToast(msg) {
+        const t = document.getElementById('toast');
+        t.innerText = msg;
+        t.style.display = 'block';
+        if (t._to) clearTimeout(t._to);
+        t._to = setTimeout(() => { t.style.display = 'none'; }, 2500);
+      },
+
+      openModal(modalId) { document.getElementById(modalId).classList.add('active'); },
+      closeModal(modalId) { document.getElementById(modalId).classList.remove('active'); },
+
+      showAlert(title, desc) {
+        document.getElementById('alert-modal-title').innerText = title;
+        document.getElementById('alert-modal-desc').innerText = desc;
+        this.openModal('modal-alert');
+      },
+
+      setupTimeInputEvents() {
+        const timeDisplay = document.getElementById('time-display-val');
+        const slider = document.getElementById('time-range-slider');
+        const quickBtns = document.querySelectorAll('.btn-time');
+
+        const updateTime = (mins) => {
+          this.state.selectedMinutes = parseInt(mins, 10);
+          const m = this.state.selectedMinutes;
+          if (m >= 60) {
+            const h = Math.floor(m / 60);
+            const rem = m % 60;
+            timeDisplay.innerText = rem > 0 ? `${m}분 (${h}시간 ${rem}분)` : `${m}분 (${h}시간)`;
+          } else {
+            timeDisplay.innerText = `${m}분`;
+          }
+          slider.value = this.state.selectedMinutes;
+
+          quickBtns.forEach(btn => {
+            btn.classList.toggle('selected', parseInt(btn.dataset.mins, 10) === this.state.selectedMinutes);
+          });
+          this.renderActivityCards();
+        };
+
+        quickBtns.forEach(btn => btn.onclick = () => updateTime(btn.dataset.mins));
+        slider.oninput = (e) => updateTime(e.target.value);
+      },
+
+      showScreen(screenName) {
+        if (this.state.currentScreen === 'animal') animalChill.stop();
+        if (this.state.currentScreen === 'stars') starGame.stop();
+        if (this.state.currentScreen === 'sand') sandGame.stop();
+
+        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+        const target = document.getElementById(`screen-${screenName}`);
+        if (target) {
+          target.classList.add('active');
+          this.state.currentScreen = screenName;
+        }
+
+        if (screenName === 'home') {
+          this.state.activeActivityId = null;
+          this.state.lastInteractionTime = Date.now();
+          this.renderActivityCards();
+        }
+      },
+
+      renderActivityCards() {
+        const container = document.getElementById('activity-card-list');
+        container.innerHTML = '';
+        const mins = this.state.selectedMinutes;
+        const activities = Object.values(this.state.data.activities);
+
+        // 시간대별 맞춤 추천 알고리즘 (유지!)
+        const isRec = (act) => {
+          if (mins <= 10) return ['bubble_pop', 'star_collector', 'animal_chill'].includes(act.id);
+          if (mins <= 20) return ['paper_shredder', 'zen_sand', 'animal_chill', 'star_collector'].includes(act.id);
+          if (mins <= 30) return ['card_match', 'grid_color', 'zen_sand'].includes(act.id);
+          return ['study_plant', 'grid_color', 'card_match'].includes(act.id);
+        };
+
+        // 정렬 규칙 (사용자 정확 지정):
+        // 1순위: 추천하는 활동 목록 최상단 배치 (isRec 최우선)
+        // 2순위: 각 그룹 내에서 포기 횟수(giveup_count)가 많을수록 하단에 배치
+        // 3순위: 포기 횟수가 같다면 완료 횟수(use_count)가 많은 활동일수록 상단에 배치
+        activities.sort((a, b) => {
+          // 1순위: 추천 활동은 무조건 비추천 활동보다 상단에 배치
+          const aRec = isRec(a) ? 1 : 0;
+          const bRec = isRec(b) ? 1 : 0;
+          if (aRec !== bRec) {
+            return bRec - aRec;
+          }
+
+          // 2순위: 포기 횟수가 많을수록 하단에 배치 (추천 목록 안에서도 포기가 많으면 추천 목록 하단으로)
+          if (a.giveup_count !== b.giveup_count) {
+            return a.giveup_count - b.giveup_count;
+          }
+
+          // 3순위: 포기 횟수가 같다면 완료 횟수가 많은 활동일수록 상단에 배치
+          if (a.use_count !== b.use_count) {
+            return b.use_count - a.use_count;
+          }
+
+          return 0;
+        });
+
+        activities.forEach(act => {
+          const recommended = isRec(act);
+          const isFrequent = act.use_count >= 5;
+          const isFrequentGiveup = act.giveup_count >= 10;
+
+          let lastUsedText = '이용 기록 없음';
+          if (act.last_used_date) {
+            const today = new Date().toISOString().split('T')[0];
+            if (act.last_used_date === today) {
+              lastUsedText = '오늘 이용함';
+            } else {
+              const diffMs = new Date(today) - new Date(act.last_used_date);
+              const diffDays = Math.max(1, Math.floor(diffMs / (1000 * 60 * 60 * 24)));
+              lastUsedText = `${diffDays}일 전 이용`;
+            }
+          }
+
+          const card = document.createElement('div');
+          card.className = `activity-card ${recommended ? 'recommended' : ''}`;
+          card.onclick = () => this.startActivity(act.id);
+
+          card.innerHTML = `
+            <div class="card-top-row">
+              <div class="act-title-wrap">
+                <div class="act-emoji">${act.emoji}</div>
+                <div><div class="act-name">${act.name}</div></div>
+              </div>
+              <div class="badge-wrap">
+                ${isFrequent ? '<span class="badge-frequent">★ 자주 이용</span>' : ''}
+                ${isFrequentGiveup ? '<span class="badge-giveup">⚠ 자주 포기</span>' : ''}
+                ${recommended ? '<span class="badge-rec">추천</span>' : ''}
+              </div>
+            </div>
+            <div class="act-desc">${act.desc}</div>
+            <div class="act-meta">
+              <span>완료: <strong>${act.use_count}</strong>회 / 포기: <strong>${act.giveup_count}</strong>회</span>
+              <span>${lastUsedText}</span>
+            </div>
+          `;
+          container.appendChild(card);
+        });
+      },
+
+      startActivity(actId) {
+        this.state.activeActivityId = actId;
+        this.state.lastInteractionTime = Date.now();
+
+        const screenMap = {
+          animal_chill: 'animal',
+          star_collector: 'stars',
+          grid_color: 'coloring',
+          bubble_pop: 'bubble',
+          paper_shredder: 'shredder',
+          zen_sand: 'sand',
+          card_match: 'card',
+          study_plant: 'plant'
+        };
+
+        const targetScreen = screenMap[actId] || 'home';
+        this.showScreen(targetScreen);
+
+        if (actId === 'animal_chill') animalChill.start();
+        else if (actId === 'star_collector') starGame.start();
+        else if (actId === 'grid_color') colorGame.start();
+        else if (actId === 'bubble_pop') bubbleGame.start();
+        else if (actId === 'paper_shredder') shredderGame.start();
+        else if (actId === 'zen_sand') sandGame.start();
+        else if (actId === 'card_match') cardMatchGame.start();
+        else if (actId === 'study_plant') plantGame.start();
+      },
+
+      complete(actId) {
+        if (!actId) return;
+        const act = this.state.data.activities[actId];
+        if (act) {
+          act.use_count += 1;
+          act.last_used_date = new Date().toISOString().split('T')[0];
+          saveAppData(this.state.data);
+        }
+        this.showScreen('home');
+        this.showAlert('활동 완료!', `'${act.name}' 활동을 만족스럽게 완료했습니다! 기록에 저장되었습니다. ✨`);
+      },
+
+      giveUp(actId) {
+        if (!actId) return;
+        const act = this.state.data.activities[actId];
+        if (act) {
+          act.giveup_count += 1;
+          saveAppData(this.state.data);
+        }
+        this.showScreen('home');
+        this.showToast(`'${act.name}' 활동을 종료했습니다. (이용 횟수는 미반영)`);
+      },
+
+      setupGlobalInactivityWatcher() {
+        const mark = () => { this.state.lastInteractionTime = Date.now(); };
+        ['click', 'touchstart', 'touchmove', 'mousemove', 'keydown'].forEach(evt => {
+          window.addEventListener(evt, mark, { passive: true });
+        });
+
+        // 10분(600초) 방치 시 자동 완료 처리 (설계서 규칙)
+        setInterval(() => {
+          if (this.state.currentScreen !== 'home' && this.state.activeActivityId) {
+            if ((Date.now() - this.state.lastInteractionTime) / 1000 >= 600) {
+              this.trigger10MinInactivity();
+            }
+          }
+        }, 3000);
+      },
+
+      trigger10MinInactivity() {
+        if (!this.state.activeActivityId) return;
+        const act = this.state.data.activities[this.state.activeActivityId];
+        act.use_count += 1;
+        act.last_used_date = new Date().toISOString().split('T')[0];
+        saveAppData(this.state.data);
+        this.state.lastInteractionTime = Date.now();
+        this.showScreen('home');
+        this.showAlert('10분 방치 자동 완료', `10분간 조작이 없어 설계서 규칙에 따라 '${act.name}' 활동이 자동 완료 처리되었습니다! 🧘`);
+      },
+
+      testAddFrequentBadge() {
+        const act = this.state.data.activities['bubble_pop'];
+        act.use_count += 5;
+        saveAppData(this.state.data);
+        this.renderActivityCards();
+        this.showToast('뽁뽁이 활동에 완료 5회가 추가되어 [★ 자주 이용] 뱃지가 붙었습니다.');
+      },
+
+      testAddGiveupBadge() {
+        const act = this.state.data.activities['bubble_pop'];
+        act.giveup_count += 10;
+        saveAppData(this.state.data);
+        this.renderActivityCards();
+        this.showToast('뽁뽁이 활동에 포기 10회가 추가되어 [⚠ 자주 포기] 뱃지가 붙었습니다.');
+      },
+
+      resetTime() {
+        this.state.selectedMinutes = 15;
+        document.getElementById('time-range-slider').value = 15;
+        document.getElementById('time-display-val').innerText = '15분';
+        document.querySelectorAll('.btn-time').forEach(b => b.classList.toggle('selected', b.dataset.mins === '15'));
+        if (this.state.currentScreen !== 'home') this.showScreen('home');
+        this.renderActivityCards();
+        this.showToast('공강 추천 기준 시간이 15분으로 리셋되었습니다.');
+      },
+
+      restartActiveActivity() {
+        if (this.state.activeActivityId) {
+          this.startActivity(this.state.activeActivityId);
+          this.showToast('현재 활동을 처음부터 다시 시작합니다.');
+        }
+      },
+
+      resetAllData() {
+        if (confirm('모든 기록과 뱃지, 별 포인트를 초기화하시겠습니까?')) {
+          localStorage.removeItem(STORAGE_KEY);
+          this.state.data = JSON.parse(JSON.stringify(defaultData));
+          this.applyTheme('default');
+          this.updateStarCounterUI();
+          this.showScreen('home');
+          this.renderActivityCards();
+          this.showToast('모든 앱 데이터가 깨끗이 초기화되었습니다.');
+        }
+      },
+
+      addStars(count) {
+        this.state.data.user_settings.total_stars += count;
+        saveAppData(this.state.data);
+        this.updateStarCounterUI();
+      },
+
+      updateStarCounterUI() {
+        document.getElementById('global-star-count').innerText = this.state.data.user_settings.total_stars;
+      },
+
+      applyTheme(t) {
+        document.body.setAttribute('data-theme', t);
+        this.state.data.user_settings.current_theme = t;
+        saveAppData(this.state.data);
+      },
+
+      openThemeShop() {
+        const themeList = [
+          { id: 'default', name: '인디고 모던 (기본)', cost: 0 },
+          { id: 'lavender', name: '소프트 라벤더 테마', cost: 25 },
+          { id: 'sage', name: '세이지 그린 힐링 테마', cost: 50 },
+          { id: 'sunset', name: '선셋 웜 테마', cost: 80 }
+        ];
+        const container = document.getElementById('theme-shop-list');
+        container.innerHTML = '';
+        const currentTheme = this.state.data.user_settings.current_theme;
+        const unlocked = this.state.data.user_settings.unlocked_themes;
+        const stars = this.state.data.user_settings.total_stars;
+
+        themeList.forEach(t => {
+          const isUnlocked = unlocked.includes(t.id);
+          const isCurrent = currentTheme === t.id;
+          const div = document.createElement('div');
+          div.className = `theme-item ${isCurrent ? 'active' : ''} ${!isUnlocked && stars < t.cost ? 'locked' : ''}`;
+          div.innerHTML = `
+            <div>
+              <strong>${t.name}</strong>
+              <div style="font-size:0.75rem; color:var(--text-muted);">${isUnlocked ? '보유 중' : `필요: ★ ${t.cost}개`}</div>
+            </div>
+            <div>${isCurrent ? '✔ 적용 중' : isUnlocked ? '적용하기' : stars >= t.cost ? '해금 가능!' : '별 부족'}</div>
+          `;
+          div.onclick = () => {
+            if (isUnlocked) {
+              this.applyTheme(t.id);
+              this.closeModal('modal-theme');
+              this.showToast(`'${t.name}'가 적용되었습니다.`);
+            } else if (stars >= t.cost) {
+              this.state.data.user_settings.total_stars -= t.cost;
+              this.state.data.user_settings.unlocked_themes.push(t.id);
+              this.applyTheme(t.id);
+              this.updateStarCounterUI();
+              this.closeModal('modal-theme');
+              this.showToast(`별 ${t.cost}개로 '${t.name}'를 해금하여 적용했습니다! 🎉`);
+            } else {
+              this.showToast(`별이 부족합니다. (${t.cost - stars}개 더 필요)`);
+            }
+          };
+          container.appendChild(div);
+        });
+        this.openModal('modal-theme');
+      }
+    };
+
+    /* ==========================================================================
+       3. 미니 활동 1: 동물 멍때리기 (최대 10마리 10종 고유 디자인)
+       ========================================================================== */
+    const animalChill = {
+      interval: null,
+      animals: [
+        { id: 'shiba', name: '시바견(황구)', color: '#f59e0b', earColor: '#d97706', earType: 'triangle', nose: '#1e293b' },
+        { id: 'corgi', name: '웰시코기', color: '#fbbf24', earColor: '#ea580c', earType: 'large_oval', nose: '#1e293b' },
+        { id: 'poodle', name: '토이푸들', color: '#92400e', earColor: '#78350f', earType: 'fluffy', nose: '#1e293b' },
+        { id: 'dalmatian', name: '달마시안', color: '#f8fafc', earColor: '#1e293b', earType: 'spotted', nose: '#0f172a' },
+        { id: 'bichon', name: '비숑 프리제', color: '#ffffff', earColor: '#f1f5f9', earType: 'round', nose: '#1e293b' },
+        { id: 'cat_cheese', name: '치즈 태비', color: '#fb923c', earColor: '#ea580c', earType: 'cat_ear', nose: '#f43f5e' },
+        { id: 'cat_mackerel', name: '고등어 태비', color: '#94a3b8', earColor: '#475569', earType: 'cat_ear', nose: '#f43f5e' },
+        { id: 'cat_calico', name: '삼색이', color: '#fed7aa', earColor: '#78350f', earType: 'cat_ear', nose: '#f43f5e' },
+        { id: 'cat_tuxedo', name: '턱시도', color: '#1e293b', earColor: '#ffffff', earType: 'cat_ear', nose: '#f43f5e' },
+        { id: 'cat_siamese', name: '샴/러시안', color: '#cbd5e1', earColor: '#334155', earType: 'cat_ear', nose: '#0f172a' }
+      ],
+
+      start() {
+        this.stop();
+        const viewport = document.getElementById('chill-viewport');
+        viewport.querySelectorAll('.animal-actor').forEach(a => a.remove());
+
+        this.animals.forEach((spec, idx) => {
+          const el = document.createElement('div');
+          el.className = 'animal-actor';
+          el.id = `animal-${spec.id}`;
+          el.title = spec.name;
+
+          const startX = 20 + (idx % 5) * 65 + (Math.random() * 20 - 10);
+          const startY = 60 + Math.floor(idx / 5) * 80 + (Math.random() * 20 - 10);
+          el.style.left = `${startX}px`;
+          el.style.bottom = `${startY}px`;
+
+          el.innerHTML = this.renderAnimalSVG(spec);
+
+          el.onclick = (e) => {
+            e.stopPropagation();
+            this.popHeart(e.clientX, e.clientY);
+            el.style.transform = `scale(1.25) translateY(-10px)`;
+            setTimeout(() => { el.style.transform = ''; }, 300);
+          };
+
+          viewport.appendChild(el);
+        });
+
+        viewport.onclick = (e) => this.popHeart(e.clientX, e.clientY);
+
+        this.interval = setInterval(() => {
+          if (app.state.currentScreen !== 'animal') return;
+
+          this.animals.forEach(spec => {
+            const actor = document.getElementById(`animal-${spec.id}`);
+            if (!actor) return;
+            const deltaX = (Math.random() * 40 - 20);
+            const deltaY = (Math.random() * 24 - 12);
+            const flip = Math.random() > 0.5 ? 1 : -1;
+            actor.style.transform = `translate(${deltaX}px, ${deltaY}px) scaleX(${flip})`;
+          });
+        }, 3200);
+      },
+
+      renderAnimalSVG(spec) {
+        return `
+          <svg viewBox="0 0 100 100" width="100%" height="100%">
+            <circle cx="50" cy="55" r="30" fill="${spec.color}"/>
+            ${spec.earType === 'cat_ear' ? `
+              <polygon points="28,34 40,16 48,32" fill="${spec.earColor}"/>
+              <polygon points="72,34 60,16 52,32" fill="${spec.earColor}"/>
+            ` : `
+              <ellipse cx="26" cy="45" rx="8" ry="16" fill="${spec.earColor}" transform="rotate(-15, 26, 45)"/>
+              <ellipse cx="74" cy="45" rx="8" ry="16" fill="${spec.earColor}" transform="rotate(15, 74, 45)"/>
+            `}
+            <circle cx="40" cy="50" r="3.5" fill="#1e293b"/>
+            <circle cx="60" cy="50" r="3.5" fill="#1e293b"/>
+            <circle cx="41" cy="48.5" r="1.2" fill="#ffffff"/>
+            <circle cx="61" cy="48.5" r="1.2" fill="#ffffff"/>
+            <ellipse cx="50" cy="60" rx="3.5" ry="2.5" fill="${spec.nose}"/>
+            <path d="M 46 64 Q 50 67 54 64" stroke="#1e293b" stroke-width="1.8" fill="none"/>
+          </svg>
+        `;
+      },
+
+      stop() {
+        if (this.interval) { clearInterval(this.interval); this.interval = null; }
+      },
+
+      popHeart(x, y) {
+        const viewport = document.getElementById('chill-viewport');
+        const rect = viewport.getBoundingClientRect();
+        const posX = (typeof x === 'number' && !isNaN(x)) ? x : (rect.left + rect.width / 2);
+        const posY = (typeof y === 'number' && !isNaN(y)) ? y : (rect.top + rect.height / 2);
+        const bubble = document.createElement('div');
+        bubble.className = 'heart-bubble';
+        bubble.innerText = ['💖', '🐾', '✨', '💤', '🌸', '🌼', '🍀'][Math.floor(Math.random() * 7)];
+        bubble.style.left = `${Math.max(10, Math.min(rect.width - 40, posX - rect.left - 12))}px`;
+        bubble.style.top = `${Math.max(10, Math.min(rect.height - 40, posY - rect.top - 12))}px`;
+        viewport.appendChild(bubble);
+        setTimeout(() => bubble.remove(), 900);
+      }
+    };
+
+    /* ==========================================================================
+       4. 미니 활동 2: 별 모으기 (최대 10개 & 10가지 색상 별)
+       ========================================================================== */
+    const starGame = {
+      spawnTimer: null,
+      sessionStars: 0,
+      starTypes: [
+        { name: '레몬 옐로우', color: '#fde047', points: 1 },
+        { name: '애프리콧 오렌지', color: '#fb923c', points: 1 },
+        { name: '루비 레드', color: '#ef4444', points: 2 },
+        { name: '체리 핑크', color: '#ec4899', points: 2 },
+        { name: '라벤더 바이올렛', color: '#a855f7', points: 3 },
+        { name: '스카이 블루', color: '#38bdf8', points: 3 },
+        { name: '사파이어 딥블루', color: '#3b82f6', points: 4 },
+        { name: '에메랄드 민트', color: '#10b981', points: 4 },
+        { name: '크리스탈 화이트', color: '#f8fafc', points: 5 },
+        { name: '무지개 레인보우', color: 'url(#rainbowGrad)', points: 10 }
+      ],
+
+      start() {
+        this.stop();
+        this.sessionStars = 0;
+        document.getElementById('session-stars-count').innerText = '0';
+        const field = document.getElementById('star-field');
+        field.querySelectorAll('.spawned-star').forEach(s => s.remove());
+
+        for (let i = 0; i < 3; i++) this.spawnStar();
+
+        this.spawnTimer = setInterval(() => {
+          if (app.state.currentScreen !== 'stars') return;
+          if (field.querySelectorAll('.spawned-star').length < 10) {
+            this.spawnStar();
+          }
+        }, 900);
+      },
+
+      stop() {
+        if (this.spawnTimer) { clearInterval(this.spawnTimer); this.spawnTimer = null; }
+        const field = document.getElementById('star-field');
+        if (field) field.querySelectorAll('.spawned-star').forEach(s => s.remove());
+      },
+
+      spawnStar() {
+        const field = document.getElementById('star-field');
+        const rect = field.getBoundingClientRect();
+        if (rect.width === 0) return;
+
+        const spec = this.starTypes[Math.floor(Math.random() * this.starTypes.length)];
+        const star = document.createElement('div');
+        star.className = 'spawned-star';
+
+        const size = Math.floor(Math.random() * 12) + 36;
+        star.style.width = `${size}px`;
+        star.style.height = `${size}px`;
+
+        const x = Math.floor(Math.random() * (rect.width - size - 30)) + 15;
+        const y = Math.floor(Math.random() * (rect.height - size - 80)) + 50;
+        star.style.left = `${x}px`;
+        star.style.top = `${y}px`;
+
+        star.innerHTML = `
+          <svg viewBox="0 0 24 24" width="100%" height="100%">
+            <defs>
+              <linearGradient id="rainbowGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#ef4444"/>
+                <stop offset="25%" stop-color="#facc15"/>
+                <stop offset="50%" stop-color="#22c55e"/>
+                <stop offset="75%" stop-color="#06b6d4"/>
+                <stop offset="100%" stop-color="#a855f7"/>
+              </linearGradient>
+            </defs>
+            <polygon points="12,2 15,9 22,9 17,14 19,21 12,17 5,21 7,14 2,9 9,9" fill="${spec.color}"/>
+          </svg>
+        `;
+
+        star.onclick = (e) => {
+          e.stopPropagation();
+          this.collectStar(star, spec, x, y);
+        };
+
+        field.appendChild(star);
+
+        setTimeout(() => { if (star.parentNode) star.remove(); }, 8000);
+      },
+
+      collectStar(starEl, spec, x, y) {
+        starEl.remove();
+        this.sessionStars += spec.points;
+        document.getElementById('session-stars-count').innerText = this.sessionStars;
+        app.addStars(spec.points);
+
+        const field = document.getElementById('star-field');
+        const effect = document.createElement('div');
+        effect.className = 'star-click-effect';
+        effect.style.color = spec.color.startsWith('url') ? '#facc15' : spec.color;
+        effect.innerText = `+${spec.points} ★`;
+        effect.style.left = `${x + 6}px`;
+        effect.style.top = `${y - 10}px`;
+        field.appendChild(effect);
+        setTimeout(() => effect.remove(), 700);
+      }
+    };
+
+    /* ==========================================================================
+       5. 미니 활동 3: 네모칸 색칠 게임 (최소 7종 도안 & 가변 크기)
+       ========================================================================== */
+    const colorGame = {
+      currentColor: '#ef4444',
+      isDrawing: false,
+      currentSize: 10,
+      palette: [
+        '#ef4444', '#f97316', '#facc15', '#22c55e', '#06b6d4',
+        '#3b82f6', '#a855f7', '#ec4899', '#78350f', '#1e293b', '#ffffff'
+      ],
+
+      start() {
+        this.renderPalette();
+        this.loadTemplate('heart');
+      },
+
+      renderPalette() {
+        const container = document.getElementById('color-palette');
+        container.innerHTML = '';
+        this.palette.forEach((color, idx) => {
+          const swatch = document.createElement('div');
+          swatch.className = `palette-swatch ${idx === 0 ? 'active' : ''}`;
+          swatch.style.backgroundColor = color;
+          swatch.title = color === '#ffffff' ? '지우개' : color;
+          swatch.onclick = () => {
+            document.querySelectorAll('.palette-swatch').forEach(s => s.classList.remove('active'));
+            swatch.classList.add('active');
+            this.currentColor = color;
+          };
+          container.appendChild(swatch);
+        });
+      },
+
+      buildGrid(size) {
+        this.currentSize = size;
+        const board = document.getElementById('pixel-grid');
+        board.innerHTML = '';
+        board.style.gridTemplateColumns = `repeat(${size}, 1fr)`;
+        const pxSize = size <= 8 ? 260 : size <= 10 ? 270 : size <= 12 ? 280 : 290;
+        board.style.width = `${pxSize}px`;
+        board.style.height = `${pxSize}px`;
+
+        board.onmousedown = () => { this.isDrawing = true; };
+        window.onmouseup = () => { this.isDrawing = false; };
+
+        for (let i = 0; i < size * size; i++) {
+          const cell = document.createElement('div');
+          cell.className = 'grid-cell';
+          cell.dataset.index = i;
+
+          const paint = () => { cell.style.backgroundColor = this.currentColor; };
+          cell.onmousedown = paint;
+          cell.onmouseenter = () => { if (this.isDrawing) paint(); };
+          board.appendChild(cell);
+        }
+
+        board.ontouchstart = (e) => { 
+          this.isDrawing = true; 
+          this.paintTouch(e); 
+        };
+        board.ontouchmove = (e) => { 
+          if (this.isDrawing) { 
+            this.paintTouch(e); 
+            e.preventDefault(); 
+          } 
+        };
+        board.ontouchend = () => { this.isDrawing = false; };
+      },
+
+      paintTouch(e) {
+        if (!e.touches || e.touches.length === 0) return;
+        const touch = e.touches[0];
+        const el = document.elementFromPoint(touch.clientX, touch.clientY);
+        if (el && el.classList.contains('grid-cell')) {
+          el.style.backgroundColor = this.currentColor;
+        }
+      },
+
+      loadTemplate(key) {
+        if (key.startsWith('free_')) {
+          const sz = parseInt(key.split('_')[1], 10);
+          this.buildGrid(sz);
+          return;
+        }
+
+        let size = 10;
+        let indices = [];
+        let guideColor = '#fecdd3';
+
+        if (key === 'heart') {
+          size = 8;
+          guideColor = '#fecdd3';
+          indices = [9, 10, 13, 14, 16, 17, 18, 19, 20, 21, 22, 23, 25, 26, 27, 28, 29, 30, 34, 35, 36, 37, 43, 44];
+        } else if (key === 'clover') {
+          size = 8;
+          guideColor = '#bbf7d0';
+          indices = [10, 11, 12, 13, 17, 18, 19, 20, 21, 22, 26, 27, 28, 29, 35, 43, 51];
+        } else if (key === 'paw') {
+          size = 10;
+          guideColor = '#fed7aa';
+          indices = [12, 13, 16, 17, 24, 25, 43, 44, 45, 46, 52, 53, 54, 55, 56, 57, 63, 64, 65, 66];
+        } else if (key === 'apple') {
+          size = 10;
+          guideColor = '#fecaca';
+          indices = [14, 15, 23, 24, 25, 26, 32, 33, 34, 35, 36, 37, 42, 43, 44, 45, 46, 47, 52, 53, 54, 55, 56, 57, 63, 64, 65, 66];
+        } else if (key === 'star') {
+          size = 10;
+          guideColor = '#fef08a';
+          indices = [14, 15, 23, 24, 25, 26, 31, 32, 33, 34, 35, 36, 37, 38, 43, 44, 45, 46, 52, 53, 54, 55, 56, 57, 62, 67, 71, 78];
+        } else if (key === 'bear') {
+          size = 12;
+          guideColor = '#fed7aa';
+          indices = [14, 15, 20, 21, 26, 27, 32, 33, 38, 39, 40, 41, 42, 43, 50, 51, 52, 53, 54, 55, 62, 63, 64, 65, 66, 67, 74, 75, 76, 77, 78, 79, 87, 88, 91, 92];
+        } else if (key === 'rainbow') {
+          size = 12;
+          guideColor = '#ddd6fe';
+          indices = [26, 27, 28, 29, 30, 31, 32, 33, 37, 38, 43, 44, 45, 46, 49, 50, 57, 58, 61, 62, 69, 70];
+        }
+
+        this.buildGrid(size);
+        const cells = document.querySelectorAll('.grid-cell');
+        indices.forEach(idx => {
+          if (cells[idx]) cells[idx].style.backgroundColor = guideColor;
+        });
+      },
+
+      clear() {
+        document.querySelectorAll('.grid-cell').forEach(c => c.style.backgroundColor = '#ffffff');
+      }
+    };
+
+    /* ==========================================================================
+       6. 신규 활동 4: 🫧 뽁뽁이 터뜨리기 (모두 터뜨려야 리필 & 황금/무지개 보너스)
+       ========================================================================== */
+    const bubbleGame = {
+      popCount: 0,
+      totalBubbles: 30,
+      poppedInSheet: 0,
+
+      start() {
+        this.refill(true);
+      },
+
+      refill(force = false) {
+        if (!force && this.poppedInSheet < this.totalBubbles) {
+          const remaining = this.totalBubbles - this.poppedInSheet;
+          app.showToast(`아직 터뜨리지 않은 뽁뽁이가 ${remaining}개 남아있습니다! 모두 터뜨려야 새 뽁뽁이로 교체됩니다.`);
+          return;
+        }
+
+        this.poppedInSheet = 0;
+        const grid = document.getElementById('bubble-grid');
+        grid.innerHTML = '';
+
+        for (let i = 0; i < this.totalBubbles; i++) {
+          const b = document.createElement('div');
+          const rand = Math.random();
+          const isRainbow = rand < 0.06; // 6% 확률 무지개 뽁뽁이
+          const isGolden = !isRainbow && rand < 0.18; // 12% 확률 황금 뽁뽁이
+
+          b.className = `bubble-cell ${isRainbow ? 'rainbow' : isGolden ? 'golden' : ''}`;
+          b.onclick = () => {
+            if (b.classList.contains('popped')) return;
+            b.classList.add('popped');
+            this.popCount++;
+            this.poppedInSheet++;
+            document.getElementById('bubble-pop-count').innerText = this.popCount;
+
+            if (isRainbow) {
+              app.addStars(15);
+              app.showToast('🌈 대박! 무지개 뽁뽁이 발견! 보너스 별 +15개 획득! 🎉');
+            } else if (isGolden) {
+              app.addStars(5);
+              app.showToast('★ 황금 뽁뽁이 발견! 보너스 별 +5개 획득! 🌟');
+            }
+
+            // 모든 뽁뽁이를 다 터뜨렸을 때 자동 리필
+            if (this.poppedInSheet >= this.totalBubbles) {
+              setTimeout(() => {
+                app.showToast('👏 30개 뽁뽁이를 모두 터뜨렸습니다! 새 뽁뽁이로 자동 리필됩니다 ✨');
+                this.refill(true);
+              }, 400);
+            }
+          };
+          grid.appendChild(b);
+        }
+      }
+    };
+
+    /* ==========================================================================
+       7. 신규 활동 5: 🗑️ 걱정 분쇄기
+       ========================================================================== */
+    const shredderGame = {
+      start() {
+        const paper = document.getElementById('worry-paper');
+        paper.style.transform = '';
+        paper.style.opacity = '1';
+        document.getElementById('worry-input').value = '';
+      },
+      shred() {
+        const input = document.getElementById('worry-input');
+        if (!input.value.trim()) {
+          app.showToast('분쇄할 고민을 짧게 적어주세요.');
+          return;
+        }
+        const paper = document.getElementById('worry-paper');
+        paper.style.transform = 'translateY(160px) scale(0.3)';
+        paper.style.opacity = '0';
+        setTimeout(() => {
+          app.showAlert('걱정 분쇄 완료!', '적어두신 고민과 스트레스가 시원하게 가루로 분쇄되었습니다. 툭 털어버리세요! ✨');
+          this.start();
+        }, 850);
+      }
+    };
+
+    /* ==========================================================================
+       8. 신규 활동 6: ⏳ 감성 모래시계 & 명상
+       ========================================================================== */
+    const sandGame = {
+      animId: null,
+      quotes: [
+        "마음을 비우고 천천히 떨어지는 모래를 바라보세요.",
+        "수업 걱정은 잠시 내려놓아도 괜찮습니다.",
+        "지금 이 순간은 온전히 나만을 위한 휴식 시간입니다.",
+        "숨을 깊게 들이쉬고, 편안하게 내쉬어보세요.",
+        "오늘 하루도 충분히 잘 해내고 있습니다."
+      ],
+      start() {
+        this.stop();
+        document.getElementById('sand-quote').innerText = this.quotes[Math.floor(Math.random() * this.quotes.length)];
+        const canvas = document.getElementById('sand-canvas');
+        const ctx = canvas.getContext('2d');
+        let topSand = 100;
+        let bottomSand = 0;
+
+        canvas.onclick = () => {
+          topSand = 100;
+          bottomSand = 0;
+          document.getElementById('sand-quote').innerText = this.quotes[Math.floor(Math.random() * this.quotes.length)];
+          app.showToast('⏳ 모래시계를 뒤집었습니다!');
+        };
+
+        const loop = () => {
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+          ctx.strokeStyle = '#475569';
+          ctx.lineWidth = 3;
+          ctx.beginPath();
+          ctx.moveTo(40, 20); ctx.lineTo(180, 20);
+          ctx.lineTo(120, 120); ctx.lineTo(180, 220);
+          ctx.lineTo(40, 220); ctx.lineTo(100, 120);
+          ctx.closePath();
+          ctx.stroke();
+
+          if (topSand > 0) {
+            ctx.fillStyle = '#f59e0b';
+            ctx.fillRect(108, 120, 4, 70);
+            topSand -= 0.08;
+            bottomSand += 0.08;
+          }
+
+          ctx.fillStyle = '#fbbf24';
+          ctx.beginPath();
+          ctx.moveTo(110 - topSand * 0.6, 25 + (100 - topSand) * 0.8);
+          ctx.lineTo(110 + topSand * 0.6, 25 + (100 - topSand) * 0.8);
+          ctx.lineTo(110, 118);
+          ctx.closePath();
+          ctx.fill();
+
+          ctx.beginPath();
+          ctx.moveTo(50, 218);
+          ctx.lineTo(170, 218);
+          ctx.lineTo(110, 218 - bottomSand * 0.7);
+          ctx.closePath();
+          ctx.fill();
+
+          this.animId = requestAnimationFrame(loop);
+        };
+        loop();
+      },
+      stop() {
+        if (this.animId) { cancelAnimationFrame(this.animId); this.animId = null; }
+      }
+    };
+
+    /* ==========================================================================
+       9. 신규 활동 7: 🧩 카드 짝맞추기 (16, 24, 32, 64장 가변 모드)
+       ========================================================================== */
+    const cardMatchGame = {
+      // 32쌍을 위한 32종 이모지 풀
+      iconsPool: [
+        '☕', '🍰', '🐶', '🐱', '⭐', '🍀', '🍎', '🍓',
+        '🍇', '🥑', '🍔', '🍕', '🍩', '🍦', '🍒', '🎈',
+        '🌸', '🌻', '🌈', '🌙', '🧸', '🚀', '🐬', '🐥',
+        '🦊', '🐼', '🐨', '🦋', '🍉', '🍭', '💎', '🎵'
+      ],
+      currentCount: 16,
+      flippedCards: [],
+      matchedCount: 0,
+
+      setCount(num) {
+        this.currentCount = num;
+        this.start();
+      },
+
+      start() {
+        const grid = document.getElementById('card-grid');
+        grid.innerHTML = '';
+        grid.className = `card-grid grid-${this.currentCount}`;
+        this.flippedCards = [];
+        this.matchedCount = 0;
+
+        const sel = document.getElementById('card-count-sel');
+        if (sel) sel.value = String(this.currentCount);
+
+        const pairCount = this.currentCount / 2;
+        const selectedIcons = this.iconsPool.slice(0, pairCount);
+        const deck = [...selectedIcons, ...selectedIcons].sort(() => Math.random() - 0.5);
+
+        deck.forEach((icon) => {
+          const card = document.createElement('div');
+          card.className = 'flip-card hidden-card';
+          card.innerText = icon;
+          card.onclick = () => this.flip(card, pairCount);
+          grid.appendChild(card);
+        });
+      },
+
+      flip(card, pairCount) {
+        if (!card.classList.contains('hidden-card') || this.flippedCards.length >= 2) return;
+        card.classList.remove('hidden-card');
+        this.flippedCards.push(card);
+
+        if (this.flippedCards.length === 2) {
+          const [c1, c2] = this.flippedCards;
+          if (c1.innerText === c2.innerText) {
+            c1.classList.add('matched');
+            c2.classList.add('matched');
+            this.flippedCards = [];
+            this.matchedCount++;
+            if (this.matchedCount === pairCount) {
+              app.showToast(`🎉 모든 카드(${this.currentCount}장) 짝을 맞췄습니다! 대단해요! 👏`);
+            }
+          } else {
+            setTimeout(() => {
+              c1.classList.add('hidden-card');
+              c2.classList.add('hidden-card');
+              this.flippedCards = [];
+            }, 600);
+          }
+        }
+      }
+    };
+
+    /* ==========================================================================
+       10. 신규 활동 8: 🪴 나만의 공강 화분 키우기 (15단계 & 물/햇빛 밸런스 시스템)
+       ========================================================================== */
+    const plantGame = {
+      currentLevel: 1, // 1 ~ 15
+      waterCount: 0,
+      sunCount: 0,
+      consecutiveWater: 0,
+      consecutiveSun: 0,
+
+      stages: [
+        { level: 1, name: '1단계: 따스한 흙 속 씨앗', icon: '🌰', desc: '흙 속에 포근히 묻힌 작은 씨앗입니다.' },
+        { level: 2, name: '2단계: 고개 내민 연두빛 싹', icon: '🌱', desc: '흙을 뚫고 앙증맞은 새싹이 돋아났습니다.' },
+        { level: 3, name: '3단계: 햇살을 반기는 두 떡잎', icon: '🌿', desc: '두 장의 떡잎이 활짝 펼쳐졌습니다.' },
+        { level: 4, name: '4단계: 곧게 자라는 아기 줄기', icon: '🪴', desc: '줄기가 힘차게 위로 곧게 뻗어갑니다.' },
+        { level: 5, name: '5단계: 싱그러운 푸른 본잎', icon: '🍃', desc: '바람에 살랑이는 건강한 본잎이 돋았습니다.' },
+        { level: 6, name: '6단계: 가지가 갈라지는 관목', icon: '🎋', desc: '줄기에서 곁가지들이 풍성해지기 시작합니다.' },
+        { level: 7, name: '7단계: 튼튼한 어린 나무', icon: '🌳', desc: '줄기가 굵어지며 어엿한 나무 형태를 갖춥니다.' },
+        { level: 8, name: '8단계: 맺히기 시작한 꽃망울', icon: '🌾', desc: '가지 끝에 단단한 꽃망울이 맺혔습니다.' },
+        { level: 9, name: '9단계: 분홍빛 머금은 꽃봉오리', icon: '🌷', desc: '꽃잎이 피어날 준비를 마쳤습니다.' },
+        { level: 10, name: '10단계: 수줍게 핀 첫 번째 꽃', icon: '🌸', desc: '첫 꽃이 피어나 은은한 향기를 풍깁니다.' },
+        { level: 11, name: '11단계: 눈부시게 만개한 꽃송이', icon: '🌺', desc: '화사하고 아름다운 꽃이 화분을 가득 채웁니다.' },
+        { level: 12, name: '12단계: 향기로운 꽃들의 군락', icon: '💐', desc: '풍성한 꽃다발처럼 우아하게 어우러졌습니다.' },
+        { level: 13, name: '13단계: 맺히기 시작한 풋풋한 열매', icon: '🍏', desc: '꽃이 진 자리에 싱그러운 초록 열매가 맺혔습니다.' },
+        { level: 14, name: '14단계: 붉게 익은 달콤한 과실', icon: '🍎', desc: '정성 어린 케어로 풍요로운 결실을 맺었습니다.' },
+        { level: 15, name: '15단계: 전설의 황금 생명수 (마스터)', icon: '🌟', desc: '완벽한 조화로 피어난 궁극의 마스터 식물입니다!' }
+      ],
+
+      start() {
+        this.currentLevel = 1;
+        this.waterCount = 0;
+        this.sunCount = 0;
+        this.consecutiveWater = 0;
+        this.consecutiveSun = 0;
+        this.updateView();
+      },
+
+      giveWater() {
+        this.waterCount++;
+        this.consecutiveWater++;
+        this.consecutiveSun = 0;
+
+        // 물 편중 체크 (연속 3회 이상 물만 주거나, 수분이 햇빛보다 3 이상 높을 때 과습으로 단계 하락)
+        if (this.consecutiveWater >= 3 || (this.waterCount - this.sunCount >= 3)) {
+          if (this.currentLevel > 1) {
+            this.currentLevel--;
+            app.showToast('⚠️ 물이 너무 많아 과습으로 시들었습니다! (단계 -1 하락)');
+          } else {
+            app.showToast('⚠️ 물이 너무 많아 과습 위험 상태입니다! 햇빛을 쬐어주세요.');
+          }
+          this.consecutiveWater = 1;
+        } else {
+          if (this.currentLevel < 15) {
+            this.currentLevel++;
+            app.showToast('💧 촉촉한 물을 주어 건강하게 성장했습니다! (단계 +1)');
+          } else {
+            app.showToast('🌟 이미 최고 단계인 마스터 생명수입니다!');
+          }
+        }
+
+        this.animateAvatar();
+        this.updateView();
+      },
+
+      giveSun() {
+        this.sunCount++;
+        this.consecutiveSun++;
+        this.consecutiveWater = 0;
+
+        // 햇빛 편중 체크 (연속 3회 이상 햇빛만 주거나, 일조량이 수분보다 3 이상 높을 때 가뭄/일소로 단계 하락)
+        if (this.consecutiveSun >= 3 || (this.sunCount - this.waterCount >= 3)) {
+          if (this.currentLevel > 1) {
+            this.currentLevel--;
+            app.showToast('⚠️ 햇빛이 너무 뜨거워 잎이 바싹 말랐습니다! (단계 -1 하락)');
+          } else {
+            app.showToast('⚠️ 햇빛이 너무 뜨거워 가뭄 위험 상태입니다! 물을 주세요.');
+          }
+          this.consecutiveSun = 1;
+        } else {
+          if (this.currentLevel < 15) {
+            this.currentLevel++;
+            app.showToast('☀️ 따스한 햇빛을 받아 무럭무럭 자라났습니다! (단계 +1)');
+          } else {
+            app.showToast('🌟 이미 최고 단계인 마스터 생명수입니다!');
+          }
+        }
+
+        this.animateAvatar();
+        this.updateView();
+      },
+
+      animateAvatar() {
+        const avatar = document.getElementById('plant-avatar');
+        avatar.style.transform = 'scale(1.25) rotate(5deg)';
+        setTimeout(() => { avatar.style.transform = 'scale(1) rotate(0deg)'; }, 250);
+      },
+
+      updateView() {
+        const stage = this.stages[this.currentLevel - 1];
+        document.getElementById('plant-avatar').innerHTML = `<span style="font-size: 5.5rem;">${stage.icon}</span>`;
+        document.getElementById('plant-stage-text').innerText = stage.name;
+        document.getElementById('plant-desc-text').innerText = stage.desc;
+        document.getElementById('plant-level-badge').innerText = `${this.currentLevel} / 15 단계`;
+
+        document.getElementById('plant-water-val').innerText = this.waterCount;
+        document.getElementById('plant-sun-val').innerText = this.sunCount;
+
+        const diff = Math.abs(this.waterCount - this.sunCount);
+        const statusEl = document.getElementById('plant-balance-status');
+        if (diff >= 2) {
+          statusEl.className = 'balance-tag warn';
+          statusEl.innerText = this.waterCount > this.sunCount ? '과습 위험! ☀️ 필요' : '가뭄 위험! 💧 필요';
+        } else {
+          statusEl.className = 'balance-tag good';
+          statusEl.innerText = '이상적 균형 🌿';
+        }
+      }
+    };
+
+    window.addEventListener('DOMContentLoaded', () => app.init());
+  </script>
+</body>
+</html>
